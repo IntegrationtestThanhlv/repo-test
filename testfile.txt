@@ -1,1 +1,110 @@
-test content
+# ==============================================================================
+# PROJECT TEST SUITE CONFIGURATION & REPOSITORY CONTEXT
+# ==============================================================================
+# Repository : IntegrationtestThanhlv/repo-test
+# Project    : Integration Testing & Automation Framework
+# Version    : 1.0.0
+# Maintainer : Integration Test Team
+# Last Update: 2026-09-17
+# ==============================================================================
+
+[PROJECT_METADATA]
+PROJECT_NAME="repo-test"
+REPO_URL="https://github.com/IntegrationtestThanhlv/repo-test"
+BRANCH_DEFAULT="main"
+DEFAULT_TIMEZONE="Asia/Ho_Chi_Minh"
+ENCODING="UTF-8"
+
+# ------------------------------------------------------------------------------
+# ENVIRONMENT DEFINITIONS
+# ------------------------------------------------------------------------------
+[ENVIRONMENTS]
+ENV_DEVELOPMENT=development
+ENV_STAGING=staging
+ENV_PRODUCTION=production
+
+[ENVIRONMENT_CONFIG.DEVELOPMENT]
+API_BASE_URL="https://api-dev.example.local/v1"
+DEBUG_MODE=true
+LOG_LEVEL="debug"
+MOCK_EXTERNAL_SERVICES=true
+DB_CONNECTION_TIMEOUT_MS=5000
+MAX_RETRY_ATTEMPTS=5
+
+[ENVIRONMENT_CONFIG.STAGING]
+API_BASE_URL="https://api-staging.example.com/v1"
+DEBUG_MODE=false
+LOG_LEVEL="info"
+MOCK_EXTERNAL_SERVICES=false
+DB_CONNECTION_TIMEOUT_MS=3000
+MAX_RETRY_ATTEMPTS=3
+
+[ENVIRONMENT_CONFIG.PRODUCTION]
+API_BASE_URL="https://api.example.com/v1"
+DEBUG_MODE=false
+LOG_LEVEL="warn"
+MOCK_EXTERNAL_SERVICES=false
+DB_CONNECTION_TIMEOUT_MS=2000
+MAX_RETRY_ATTEMPTS=2
+
+# ------------------------------------------------------------------------------
+# CI/CD PIPELINE & GITHUB ACTIONS INTEGRATION
+# ------------------------------------------------------------------------------
+[CI_CD_WORKFLOWS]
+WORKFLOW_NAME="Demo Workflow with Single Parameter"
+WORKFLOW_FILE=".github/workflows/demo-params.yml"
+ALLOWED_DISPATCH_INPUTS=["environment"]
+DEFAULT_TARGET_ENVIRONMENT="staging"
+AUTO_RUN_ON_PUSH_BRANCHES=["main"]
+REPORT_OUTPUT_FORMAT="markdown_summary"
+
+# ------------------------------------------------------------------------------
+# TEST SUITE MATRIX & TEST CASES
+# ------------------------------------------------------------------------------
+[TEST_SUITES]
+SUITE_01="TC_SMOKE_HEALTH_CHECK"
+SUITE_01_DESCRIPTION="Verify basic service health and ping endpoint availability"
+SUITE_01_TIMEOUT_SEC=15
+SUITE_01_CRITICAL=true
+
+SUITE_02="TC_AUTH_TOKEN_VALIDATION"
+SUITE_02_DESCRIPTION="Validate JWT authorization and permission scopes across roles"
+SUITE_02_TIMEOUT_SEC=30
+SUITE_02_CRITICAL=true
+
+SUITE_03="TC_DATA_INGESTION_INTEGRATION"
+SUITE_03_DESCRIPTION="Verify batch data processing and persistence consistency"
+SUITE_03_TIMEOUT_SEC=60
+SUITE_03_CRITICAL=false
+
+SUITE_04="TC_API_LATENCY_BENCHMARK"
+SUITE_04_DESCRIPTION="Check p95 latency under 200ms for core endpoints"
+SUITE_04_TIMEOUT_SEC=45
+SUITE_04_CRITICAL=false
+
+# ------------------------------------------------------------------------------
+# MOCK TEST DATA & PAYLOAD TEMPLATES
+# ------------------------------------------------------------------------------
+[MOCK_DATA.SAMPLE_USER]
+USER_ID="usr_test_98412"
+USERNAME="qa.automation"
+EMAIL="qa.automation@test.local"
+ROLE="ADMIN"
+STATUS="ACTIVE"
+
+[MOCK_DATA.SAMPLE_PAYLOAD]
+{
+  "transaction_id": "tx_20260917_001",
+  "source": "automated_integration_test",
+  "payload_type": "event_trigger",
+  "metadata": {
+    "version": "1.0.0",
+    "region": "ap-southeast-1",
+    "dry_run": false
+  },
+  "tags": ["ci", "github-actions", "integration-test"]
+}
+
+# ==============================================================================
+# END OF CONFIGURATION & CONTEXT FILE
+# ==============================================================================
