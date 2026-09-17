@@ -1,49 +1,17 @@
-name: Demo Workflow with Parameters
+name: Demo Workflow with Single Parameter
 
 on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Môi trường triển khai (Environment)'
+        description: 'Target deployment environment'
         required: true
         type: choice
-        default: 'dev'
+        default: 'staging'
         options:
-          - dev
+          - development
           - staging
           - production
-      version:
-        description: 'Phiên bản release / build version'
-        required: false
-        type: string
-        default: 'v1.0.0'
-      run_tests:
-        description: 'Chạy automated tests trước khi chạy tiếp?'
-        required: true
-        type: boolean
-        default: true
-      log_level:
-        description: 'Mức độ log (Log level)'
-        required: false
-        type: choice
-        default: 'info'
-        options:
-          - debug
-          - info
-          - warn
-          - error
-      deploy_message:
-        description: 'Ghi chú / Thông điệp chạy workflow'
-        required: false
-        type: string
-        default: 'Demo trigger via GitHub Actions with parameters'
-      retry_count:
-        description: 'Số lần thử lại nếu thất bại (Retry count)'
-        required: false
-        type: number
-        default: 3
-
-  # Cho phép tự động chạy kiểm thử khi push vào nhánh main
   push:
     branches:
       - main
@@ -51,96 +19,39 @@ on:
       - '.github/workflows/**'
 
 jobs:
-  demo-params-job:
-    name: Demo Run - ${{ inputs.environment || 'push-event' }}
+  demo:
+    name: Demo Run
     runs-on: ubuntu-latest
 
-    env:
-      TARGET_ENV: ${{ inputs.environment || 'dev' }}
-      APP_VERSION: ${{ inputs.version || 'v1.0.0' }}
-      RUN_TESTS: ${{ inputs.run_tests != false }}
-      LOG_LEVEL: ${{ inputs.log_level || 'info' }}
-      DEPLOY_MSG: ${{ inputs.deploy_message || 'Triggered via push event (default fallback)' }}
-      RETRY_COUNT: ${{ inputs.retry_count || 3 }}
-
     steps:
-      - name: 📥 Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 📋 Hiển thị tất cả tham số nhận được (Print Parameters)
+      - name: Print parameter
         run: |
-          echo "=================================================="
-          echo "🚀 WORKFLOW TRIGGERED!"
-          echo "=================================================="
-          echo "Trigger Event   : ${{ github.event_name }}"
-          echo "Actor           : ${{ github.actor }}"
-          echo "Git Ref / Branch: ${{ github.ref_name }}"
-          echo "--------------------------------------------------"
-          echo "📌 PARAMETERS:"
-          echo "  - Environment   : $TARGET_ENV"
-          echo "  - Version       : $APP_VERSION"
-          echo "  - Run Tests     : $RUN_TESTS"
-          echo "  - Log Level     : $LOG_LEVEL"
-          echo "  - Message       : $DEPLOY_MSG"
-          echo "  - Retry Count   : $RETRY_COUNT"
-          echo "=================================================="
+          echo "=========================================="
+          echo "Event: ${{ github.event_name }}"
+          echo "Triggered by: ${{ github.actor }}"
+          echo "Selected environment: ${{ inputs.environment || 'staging' }}"
+          echo "=========================================="
 
-      - name: 🧪 Chạy kiểm thử tự động (Conditional Tests)
-        if: env.RUN_TESTS == 'true'
+      - name: Execute demo task
         run: |
-          echo "::group::Đang thực thi Test Suite..."
-          echo "[$LOG_LEVEL] Bắt đầu chạy unit tests và integration tests..."
+          TARGET_ENV="${{ inputs.environment || 'staging' }}"
+          echo "Starting demo task for target environment: $TARGET_ENV"
           sleep 2
-          echo "[$LOG_LEVEL] Unit tests: 12 passed, 0 failed."
-          echo "[$LOG_LEVEL] Integration tests: 5 passed, 0 failed."
-          echo "✅ Tất cả các bài kiểm thử đã vượt qua thành công!"
-          echo "::endgroup::"
+          echo "Demo task finished successfully for $TARGET_ENV!"
 
-      - name: ⏭️ Bỏ qua kiểm thử (Khi run_tests = false)
-        if: env.RUN_TESTS != 'true'
-        run: |
-          echo "::notice title=Skipped Tests::Tùy chọn 'run_tests' được đặt là false. Đã bỏ qua bước kiểm thử."
-
-      - name: ⚠️ Cảnh báo an toàn môi trường Production
-        if: env.TARGET_ENV == 'production'
-        run: |
-          echo "::warning title=Production Deployment Alert::Đang triển khai lên môi trường PRODUCTION với phiên bản $APP_VERSION. Hãy kiểm tra cẩn thận!"
-
-      - name: 🚀 Giả lập triển khai ứng dụng (Simulate Deployment)
-        run: |
-          echo "::group::Đang triển khai lên [$TARGET_ENV]..."
-          echo "Môi trường          : $TARGET_ENV"
-          echo "Phiên bản           : $APP_VERSION"
-          echo "Log level           : $LOG_LEVEL"
-          echo "Thông điệp          : $DEPLOY_MSG"
-          echo "Số lần retry tối đa : $RETRY_COUNT"
-          echo "..."
-          sleep 2
-          echo "🎉 Triển khai thành công ứng dụng $APP_VERSION lên $TARGET_ENV!"
-          echo "::endgroup::"
-
-      - name: 📊 Xuất báo cáo GitHub Step Summary (Markdown Summary)
+      - name: Generate step summary
         if: always()
         run: |
-          cat << EOF >> $GITHUB_STEP_SUMMARY
-          # 🚀 Kết Quả Thực Thi Workflow Demo
+          cat << 'EOF' >> $GITHUB_STEP_SUMMARY
+          ## 🚀 Execution Summary
 
-          Workflow được kích hoạt thành công qua sự kiện: **\`${{ github.event_name }}\`**.
-
-          ### 📋 Chi tiết tham số đầu vào:
-          | Tham số (Parameter) | Kiểu dữ liệu | Giá trị đã chọn |
-          |:---|:---|:---|
-          | **Environment** | Choice | \`$TARGET_ENV\` |
-          | **Version** | String | \`$APP_VERSION\` |
-          | **Run Tests** | Boolean | \`$RUN_TESTS\` |
-          | **Log Level** | Choice | \`$LOG_LEVEL\` |
-          | **Deploy Message** | String | \`$DEPLOY_MSG\` |
-          | **Retry Count** | Number | \`$RETRY_COUNT\` |
-          | **Người kích hoạt** | GitHub Actor | \`@${{ github.actor }}\` |
-
-          ---
-          ### 🎯 Kết quả:
-          - **Trạng thái**: Hoàn thành thành công (Success) ✅
-          - **Môi trường đích**: **\`$TARGET_ENV\`**
-          - **Phiên bản build**: **\`$APP_VERSION\`**
+          | Parameter | Value |
+          |:---|:---|
+          | **Event** | `${{ github.event_name }}` |
+          | **Environment** | `${{ inputs.environment || 'staging' }}` |
+          | **Triggered By** | `@${{ github.actor }}` |
+          | **Status** | Completed Successfully ✅ |
           EOF
